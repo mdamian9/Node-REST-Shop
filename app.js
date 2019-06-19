@@ -1,12 +1,36 @@
 const express = require('express');
 const app = express();
 const logger = require('morgan');
+const bodyParser = require('body-parser');
 
 const productRoutes = require('./api/routes/products');
 const orderRoutes = require('./api/routes/orders');
 
-// Log all requests to console
+/* 
+    Use middleware: morgan / body-parser
+    - Use bodyParser.urlencoded to parse urlencoded bodies with {extended: false} for simple bodies
+    - Use bodyParser.json() to extract JSON data and make readable / accessible
+    - Use middleware to funnel every request through it to handle CORS
+*/
 app.use(logger('dev'));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use((req, res, next) => {
+    // Add headers to adjust response with the following headers to handle CORS errors
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header(
+        'Access-Control-Allow-Headers',
+        'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+    );
+    // If browser sends OPTIONS request, set header 
+    if (req.method === 'OPTIONS') {
+        // Set header to let browser know what requests it may send
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
+        return res.status(200).json({})
+    };
+    // Send request to next middleware (our routes in this case)
+    next();
+});
 
 // Routes to handle requests
 app.use('/products', productRoutes);

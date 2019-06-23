@@ -2,9 +2,17 @@ const express = require('express');
 const app = express();
 const logger = require('morgan');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
+// Require routes
 const productRoutes = require('./api/routes/products');
 const orderRoutes = require('./api/routes/orders');
+
+// Connect to mongoDB using mongoose
+mongoose.connect(
+    `mongodb+srv://mdamian9:${process.env.MONGO_ATLAS_PW}@node-rest-shop-0xhk0.mongodb.net/test?retryWrites=true&w=majority`,
+    { useNewUrlParser: true }
+);
 
 /* 
     Use middleware: morgan / body-parser

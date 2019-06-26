@@ -5,9 +5,18 @@ const mongoose = require('mongoose');
 const Product = require('../models/product');
 
 router.get('/', (req, res, next) => {
-    // Set status code to 200, and send back json response
-    res.status(200).json({
-        message: '/products GET requests'
+    Product.find().exec().then(docs => {
+        console.log(docs);
+        // if (docs.length >= 0) {
+        res.status(200).json(docs);
+        // else {
+        //     res.status(404).json({
+        //         message: 'No documents found'
+        //     });
+        // };
+    }).catch(err => {
+        console.log(err);
+        res.status(500).json({ error: err });
     });
 });
 
@@ -43,20 +52,37 @@ router.get('/:productId', (req, res, next) => {
         };
     }).catch(err => {
         console.log(err);
-        // If an error is caught, set status code to 500 and send error JSON data
         res.status(500).json({ error: err });
     });
 });
 
 router.patch('/:productId', (req, res, next) => {
-    res.status(200).json({
-        message: 'Updated product (PATCH)'
+    const updateOps = {};
+    // Loop through operations in req.body
+    for (const ops of req.body) {
+        // Set operation property name equal to the value in updateOps object
+        updateOps[ops.propName] = ops.value;
+    };
+    // Update product with given ID passed, and set changes to updateOps
+    Product.updateOne({ _id: req.params.productId }, { $set: updateOps }).exec().then(result => {
+        console.log(result);
+        res.status(200).json(result);
+    }).catch(err => {
+        console.log(err);
+        res.status(500).json({ error: err });
     });
 });
 
 router.delete('/:productId', (req, res, next) => {
-    res.status(200).json({
-        message: 'Deleted product'
+    Product.remove({ _id: req.params.productId }).exec().then(result => {
+        console.log(result);
+        res.status(200).json({
+            message: 'Deleted product',
+            result: result
+        });
+    }).catch(err => {
+        console.log(err);
+        res.status(500).json({ error: err });
     });
 });
 

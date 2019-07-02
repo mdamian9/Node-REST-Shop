@@ -31,19 +31,25 @@ router.get('/', (req, res, next) => {
 
 router.post('/', (req, res, next) => {
     Product.findById(req.body.productId).then(product => {
-        // If product is null (invalid ID) send 404 response
+        // If product is null (invalid ID) return false to send 404 response
         if (!product) {
+            return false;
+        } else {
+            const order = new Order({
+                _id: mongoose.Types.ObjectId(),
+                quantity: req.body.quantity,
+                product: req.body.productId
+            });
+            return order.save();
+        };
+    }).then(result => {
+        // If result was false (invalid product ID), return 404 error response
+        if (!result) {
             return res.status(404).json({
-                message: 'Product not found'
+                message: 'No product found'
             });
         };
-        const order = new Order({
-            _id: mongoose.Types.ObjectId(),
-            quantity: req.body.quantity,
-            product: req.body.productId
-        });
-        return order.save();
-    }).then(result => {
+        console.log(result);
         res.status(201).json({
             message: 'Order successfully created',
             createdOrder: {
@@ -64,18 +70,51 @@ router.post('/', (req, res, next) => {
     });
 });
 
+Order.fi
+
 router.get('/:orderId', (req, res, next) => {
-    res.status(200).json({
-        message: 'GET orderId',
-        orderId: req.params.orderId
+    Order.findById(req.params.orderId).exec().then(order => {
+        // if (!order) {
+        //     return res.status(404).json({
+        //         message:
+        //     })
+        // }
+        res.status(200).json({
+            order: order,
+            request: {
+                type: 'GET',
+                url: 'http://localhost:3000/',
+                description: 'GET request to obtain a list of all orders'
+            }
+        });
+    }).catch(err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
+        });
     });
 });
 
 router.delete('/:orderId', (req, res, next) => {
-    res.status(200).json({
-        message: 'DELETE orderId',
-        orderId: req.params.orderId
+    Order.remove({_id: req.params.orderId}).exec().then(result => {
+        res.status(200).json({
+            message: 'Order deleted successfully',
+            request: {
+                type: 'POST',
+                url: 'http://localhost:3000/orders',
+                body: { productId: 'ID', quantity: 'Number'},
+                description: 'Use this POST route to create a new order'
+            }
+        })
+    }).catch(err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
+        });
     });
 });
 
 module.exports = router;
+
+// Replace update() with updateOne(), updateMany(), or replaceOne()
+// Replace remove() with deleteOne() or deleteMany().

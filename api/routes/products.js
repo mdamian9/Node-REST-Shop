@@ -1,21 +1,39 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+
+// We will use Multer and set up storage config to upload a file
 const multer = require('multer');
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, './uploads/');
+        cb(null, 'uploads/');
     },
     filename: (req, file, cb) => {
-        cb(null, file.originalname + new Date().toISOString());
+        cb(null, `${Date.now()}_${file.originalname}`);
     }
 });
-const upload = multer({ storage: storage });
+const upload = multer({
+    storage: storage,
+    // Limit to 5MB files
+    limits: {
+        fileSize: 1024 * 1024 * 5
+    },
+    // Custom filter created to accept only jpeg and png image formats
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+            console.log('Image accepted');
+            cb(null, true);
+        } else {
+            console.log('Invalid image');
+            cb(null, false);
+        };
+    }
+});
 
 const Product = require('../models/product');
 
 router.get('/', (req, res, next) => {
-    Product.find().select('name price _id').exec().then(docs => {
+    Product.find().select('name price productImage _id').exec().then(docs => {
         // if (docs.length >= 0) {
         // Return a well structured response
         res.status(200).json({
@@ -24,6 +42,7 @@ router.get('/', (req, res, next) => {
                 return {
                     name: doc.name,
                     price: doc.price,
+                    productImage: doc.productImage,
                     _id: doc._id,
                     request: {
                         type: 'GET',
@@ -48,7 +67,8 @@ router.post('/', upload.single('productImage'), (req, res, next) => {
     const product = new Product({
         _id: new mongoose.Types.ObjectId(),
         name: req.body.name,
-        price: req.body.price
+        price: req.body.price,
+        productImage: req.file.path
     });
     product.save().then(result => {
         console.log(result);
@@ -71,7 +91,7 @@ router.post('/', upload.single('productImage'), (req, res, next) => {
 });
 
 router.get('/:productId', (req, res, next) => {
-    Product.findById(req.params.productId).select('name price _id').exec().then(doc => {
+    Product.findById(req.params.productId).select('name price productImage _id').exec().then(doc => {
         /* 
             Sometimes mongoDB ID's are valid but unexistant. If doc exists send ok response, else set status
             code to 404 and send error message.

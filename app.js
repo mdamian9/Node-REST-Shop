@@ -16,11 +16,13 @@ mongoose.connect(
 
 /* 
     Use middleware: morgan / body-parser
+    - Use express.static middleware targeting /uploads route, make uploads folder public
     - Use bodyParser.urlencoded to parse urlencoded bodies with {extended: false} for simple bodies
     - Use bodyParser.json() to extract JSON data and make readable / accessible
     - Use middleware to funnel every request through it to handle CORS
 */
 app.use(logger('dev'));
+app.use('/uploads', express.static('uploads'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use((req, res, next) => {

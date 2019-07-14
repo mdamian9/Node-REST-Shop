@@ -14,6 +14,7 @@ mongoose.connect(
     `mongodb+srv://mdamian9:${process.env.MONGO_ATLAS_PW}@node-rest-shop-0xhk0.mongodb.net/test?retryWrites=true&w=majority`,
     { useNewUrlParser: true }
 );
+mongoose.set('useCreateIndex', true);
 
 /* 
     Use middleware: morgan / body-parser

@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const checkAuth = require('../middleware/checkAuth');
 
 const Order = require('../models/order');
 const Product = require('../models/product');
 
-router.get('/', (req, res, next) => {
+router.get('/', checkAuth, (req, res, next) => {
     // Use .populate to also return data about the product in the order
     Order.find().select('product quantity _id').populate('product', 'name price').exec().then(docs => {
         res.status(200).json({
@@ -30,7 +31,7 @@ router.get('/', (req, res, next) => {
     });
 });
 
-router.post('/', (req, res, next) => {
+router.post('/', checkAuth, (req, res, next) => {
     Product.findById(req.body.productId).then(product => {
         // If product is null (invalid ID) return false to send 404 response
         if (!product) {
@@ -71,7 +72,7 @@ router.post('/', (req, res, next) => {
     });
 });
 
-router.get('/:orderId', (req, res, next) => {
+router.get('/:orderId', checkAuth, (req, res, next) => {
     Order.findById(req.params.orderId).populate('product').exec().then(order => {
         if (!order) {
             return res.status(404).json({
@@ -94,7 +95,7 @@ router.get('/:orderId', (req, res, next) => {
     });
 });
 
-router.delete('/:orderId', (req, res, next) => {
+router.delete('/:orderId', checkAuth, (req, res, next) => {
     Order.remove({ _id: req.params.orderId }).exec().then(result => {
         res.status(200).json({
             message: 'Order deleted successfully',

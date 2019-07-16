@@ -1,7 +1,6 @@
 const express = require('express');
 const app = express();
 const logger = require('morgan');
-const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
 // Require routes
@@ -25,8 +24,8 @@ mongoose.set('useCreateIndex', true);
 */
 app.use(logger('dev'));
 app.use('/uploads', express.static('uploads'));
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 app.use((req, res, next) => {
     // Add headers to adjust response with the following headers to handle CORS errors
     res.header('Access-Control-Allow-Origin', '*');

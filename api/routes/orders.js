@@ -105,7 +105,7 @@ router.delete('/:orderId', checkAuth, (req, res, next) => {
                 body: { productId: 'ID', quantity: 'Number' },
                 description: 'Use this POST route to create a new order'
             }
-        })
+        });
     }).catch(err => {
         console.log(err);
         res.status(500).json({

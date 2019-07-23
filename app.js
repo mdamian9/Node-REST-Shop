@@ -37,7 +37,7 @@ app.use((req, res, next) => {
     if (req.method === 'OPTIONS') {
         // Set header to let browser know what requests it may send
         res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
-        return res.status(200).json({})
+        return res.status(200).json({});
     };
     // Send request to next middleware (our routes in this case)
     next();

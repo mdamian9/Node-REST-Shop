@@ -93,7 +93,7 @@ router.post('/', checkAuth, upload.single('productImage'), (req, res, next) => {
 
 router.get('/:productId', (req, res, next) => {
     Product.findById(req.params.productId).select('name price productImage _id').exec().then(doc => {
-        /* 
+        /*
             Sometimes mongoDB ID's are valid but unexistant. If doc exists send ok response, else set status
             code to 404 and send error message.
         */
